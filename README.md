@@ -1,29 +1,30 @@
 # Devcard - GitHub Profile Visualizer
 
-A reimagined GitHub profile viewer built for the Cloud Computing Cell (AKGEC) frontend task.
-Plain HTML / CSS / vanilla JavaScript — no frameworks, no build step, no charting libraries.
+A reimagined GitHub profile viewer built for the Cloud Computing Cell (AKGEC) frontend task
+plain HTML, CSS, JavaScript 
 
-Project Name: Devcard - GitHub Profile Visualizer
+**Project Name: Devcard - GitHub Profile Visualizer**
+
 What I Built?
 
 I built a website where you type in any GitHub username and it shows that person's GitHub profile in a creative visual way instead of just showing plain text and numbers. 
 It draws charts and cards to make the data easy to understand at a glance. The app fetches real, live data directly from GitHub's official API -nothing is hardcoded or fake.
 
-What it shows:
+**What it shows:**
 ->Profile info - avatar, name, bio, location, followers/following count
 ->A pie chart showing which programming languages the person codes in most
 ->Their top 6 repositories as cards, showing stars, forks, and description
 ->A compare mode to look up two GitHub users side by side
 ->A dark/light theme switch
 
-Technologies Used:
-Technology -   What its for
+**Technologies Used:**
+Technology -   What it's for
 ->HTML	        -        The structure/skeleton of the page
 ->CSS    	        -       Styling-colors, layout, animations
-->JavaScript  - The logic fetching data, building the charts, handling errors
+->JavaScript      -       The logic fetching data, building the charts, handling errors
 ->GitHub REST API   -   	The source of all the real data (profile, repos, languages)
 
-Features Implemented:
+**Features Implemented:**
 1)Live search
 2)Hand built chart
 3)Error handling
