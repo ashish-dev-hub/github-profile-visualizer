@@ -1,79 +1,51 @@
-# Devcard — GitHub Profile Visualizer
+# Devcard - GitHub Profile Visualizer
 
 A reimagined GitHub profile viewer built for the Cloud Computing Cell (AKGEC) frontend task.
 Plain HTML / CSS / vanilla JavaScript — no frameworks, no build step, no charting libraries.
 
-## Run it locally
+Project Name: Devcard - GitHub Profile Visualizer
+What I Built?
 
-No installation needed. Any static file server works:
+I built a website where you type in any GitHub username and it shows that person's GitHub profile in a creative visual way instead of just showing plain text and numbers. 
+It draws charts and cards to make the data easy to understand at a glance. The app fetches real, live data directly from GitHub's official API -nothing is hardcoded or fake.
 
-```bash
-cd github-profile-visualizer
-python3 -m http.server 8080
-# then open http://localhost:8080
-```
+What it shows:
+->Profile info - avatar, name, bio, location, followers/following count
+->A pie chart showing which programming languages the person codes in most
+->Their top 6 repositories as cards, showing stars, forks, and description
+->A compare mode to look up two GitHub users side by side
+->A dark/light theme switch
 
-Or just double-click `index.html` (fetch calls to the GitHub API work fine from `file://` too,
-though a local server is recommended for consistent behavior across browsers).
+Technologies Used:
+Technology -   What its for
+->HTML	        -        The structure/skeleton of the page
+->CSS    	        -       Styling-colors, layout, animations
+->JavaScript  - The logic fetching data, building the charts, handling errors
+->GitHub REST API   -   	The source of all the real data (profile, repos, languages)
 
-## Deploy
+Features Implemented:
+1)Live search
+2)Hand built chart
+3)Error handling
+4)Compare mode
+5)Dark/light theme toggle
+6)Responsive design - works on mobile, tablet and desktop screens
 
-This is a static site (`index.html`, `styles.css`, `app.js`) — drag the folder into
-[Vercel](https://vercel.com/new), [Netlify Drop](https://app.netlify.com/drop), or push it to a
-repo and enable **GitHub Pages** in the repo settings (Settings → Pages → deploy from `main`).
-No environment variables or build commands are required.
+**Now the most important part of the project is Challenges Faced by me during building this project:**
 
-## What it does
+1) Building a chart without a library->
+The hardest part was drawing the donut chart myself using raw SVG instead of an easy library like Chart.js
+I had to learn how a circle outline can be turned into a colored slice using math converting each languages percentage into an arc length along the circle
 
-- Type any GitHub username and it fetches live data — profile, repositories, and languages —
-  from the public GitHub REST API (`api.github.com`). No hardcoded/mock data anywhere.
-- **Identity panel**: avatar, name, bio (typed out character-by-character), location/company/blog,
-  join date, and follower/following/repo/gist counts.
-- **Language footprint**: a hand-built SVG donut chart (raw `<circle>` elements with
-  `stroke-dasharray` math — no Chart.js/Recharts/etc.) showing the language mix across a
-  developer's repos, with a legend and percentages.
-- **Top repositories**: the 6 highest-starred repos as interactive cards (stars, forks, primary
-  language, description), each linking out to GitHub.
-- **Compare mode**: toggle to look up two developers side by side.
-- **Dark/light theme toggle**: re-themes the entire UI (not just the background) using CSS custom
-  properties.
-- Smooth, animated transitions between loading → loaded states and between searches (no hard cuts).
-- Fully responsive layout (desktop / tablet / mobile).
+2) Handling Githubs API limits->
+GitHub only allows 60 requests per hour without logging in If I called the API too many times (like checking every single repo's exact language breakdown) the app would get blocked.
+I solved this by only fetching detailed data for the top 8 most-starred repos and using each repo basic primary language label as a fallback for the rest - so the app stays useful without hitting the limit.
 
-## API resilience — the heavily-weighted part
+3) Handling errors gracefully->
+A username that doesn't exist an account with 0 repos and a slow or failed network request all needed to be handled differently without the page ever going blank or crashing.
+I had to write separate logic to detect and respond to each of these situations clearly.
 
-- **Nonexistent username** → GitHub returns `404`; the UI shows a friendly "user not found" state,
-  never a blank screen or console error.
-- **Zero public repos** → charts and repo grid degrade gracefully with an explanatory message
-  instead of breaking.
-- **Rate limiting** (`403` + `X-RateLimit-Remaining: 0`) → detected explicitly via response
-  headers, with a banner telling the user how many minutes until the limit resets.
-- **Network failures / slow responses** → wrapped in `try/catch`; shown as a distinct "network
-  error" state rather than an infinite spinner.
-- **Rate-limit-aware design**: instead of calling the expensive `/repos/{owner}/{repo}/languages`
-  endpoint for every repository (which would burn through the 60 req/hr unauthenticated limit fast
-  on accounts with many repos), the app only fetches detailed byte-level language data for the top
-  8 most-starred repos and falls back to each repo's single reported primary language for the rest.
-  If even those calls get rate-limited, the chart still renders from the primary-language fallback
-  data rather than failing.
-- A tiny in-memory request cache avoids re-fetching the same endpoint twice in one session.
-
-## Design system
-
-The visual language follows `DESIGN-supabase.md`: white canvas with a single emerald green
-(`#3ecf8e`) accent reserved for primary actions, near-black text on the green CTA (not white),
-6px "square-ish" button radii, Inter at weight 500 with tight letter-spacing for display type, and
-flat 1px-hairline cards with restrained shadows rather than gradients. Dark mode swaps the palette
-tokens (`canvas-night` / `on-dark`) without changing structure.
+4) Learning git/github workflow ->
+Since I'm still learning JavaScript deeply working with git add, commit, push and resolving a merge conflict when pushing updates was a new experience I had to figure out step by step.
 
 
-## Notes / honest limitations
-
-- The GitHub contribution heatmap (green grid) and "export as image" stretch goals were left out
-  of this submission — the heatmap requires either GitHub's GraphQL API (needs an auth token, which
-  conflicts with the "no hardcoded credentials, unauthenticated client-only" constraint) or scraping
-  `github.com/users/{user}/contributions`, which GitHub does not serve with CORS headers for
-  browser fetches. Rather than fake it, it's documented here as a known gap.
-- "Private/restricted profile" edge cases are handled the way the public REST API actually exposes
-  them (suspended/removed accounts surface as `404`); there's no separate "private profile" flag in
-  the API for the client to detect beyond that.
