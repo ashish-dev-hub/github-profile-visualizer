@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Devcard — GitHub Profile Visualizer</title>
+<meta name="description" content="A reimagined, animated GitHub profile viewer with hand-built data visualizations." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="#" onclick="return false;">
+        <span class="nav__mark">Devcard</span><span class="nav__dot">.</span>
+      </a>
+      <div class="nav__actions">
+        <button id="compareToggle" class="btn btn--outline" type="button">Compare mode</button>
+        <button id="themeToggle" class="btn btn--dark" type="button" aria-label="Toggle theme">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero__inner">
+      <p class="pill">Live data · GitHub REST API</p>
+      <h1 class="hero__title">See a developer's<br/>work, rendered.</h1>
+      <p class="hero__sub">Type a GitHub username. We fetch the profile, repos, and language data,
+        and hand-build every chart from scratch — no charting libraries involved.</p>
+
+      <form id="searchForm" class="search" autocomplete="off">
+        <div class="search__row">
+          <input id="usernameInput" class="search__input" type="text" placeholder="e.g. torvalds" aria-label="GitHub username" />
+          <button class="btn btn--primary" type="submit">Visualize</button>
+        </div>
+        <div id="compareRow" class="search__row search__row--compare hidden">
+          <input id="usernameInput2" class="search__input" type="text" placeholder="second username to compare" aria-label="Second GitHub username" />
+        </div>
+        <p class="search__hint">Try edge cases too: a nonexistent username, or an account with zero public repos.</p>
+      </form>
+    </div>
+  </section>
+
+  <div id="statusBanner" class="status-banner hidden" role="alert"></div>
+
+  <section id="loadingState" class="loading hidden">
+    <div class="loading__inner">
+      <div class="skeleton skeleton--avatar"></div>
+      <div class="skeleton__lines">
+        <div class="skeleton skeleton--line" style="width:40%"></div>
+        <div class="skeleton skeleton--line" style="width:70%"></div>
+        <div class="skeleton skeleton--line" style="width:55%"></div>
+      </div>
+    </div>
+    <p class="loading__label"><span class="spinner"></span> Fetching from GitHub…</p>
+  </section>
+
+  <section id="emptyState" class="empty-state hidden">
+    <div class="empty-state__icon">◌</div>
+    <h2 id="emptyTitle">User not found</h2>
+    <p id="emptyMessage">We couldn't find that GitHub account. Double check the username and try again.</p>
+  </section>
+
+  <main id="results" class="results hidden">
+    <div id="profileGrid" class="profile-grid"></div>
+  </main>
+
+  <main id="compareResults" class="compare-results hidden">
+    <div class="compare-results__inner">
+      <div id="compareCol1" class="compare-col"></div>
+      <div class="compare-vs">VS</div>
+      <div id="compareCol2" class="compare-col"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Built for the Cloud Computing Cell, AKGEC — Frontend Task. Data via the public GitHub REST API. Unauthenticated rate limit: 60 req/hr.</p>
+  </footer>
+
+  <template id="profileTemplate">
+    <div class="profile-card">
+      <div class="profile-card__identity">
+        <img class="profile-card__avatar" alt="" />
+        <div class="profile-card__id-text">
+          <h2 class="profile-card__name"></h2>
+          <p class="profile-card__login"></p>
+          <p class="profile-card__bio"></p>
+          <div class="profile-card__meta"></div>
+          <div class="profile-card__stats"></div>
+        </div>
+      </div>
+
+      <div class="panel panel--chart">
+        <div class="panel__head">
+          <h3>Language footprint</h3>
+          <span class="panel__tag">by bytes across repos</span>
+        </div>
+        <div class="chart-wrap"></div>
+      </div>
+
+      <div class="panel panel--repos">
+        <div class="panel__head">
+          <h3>Top repositories</h3>
+          <span class="panel__tag"></span>
+        </div>
+        <div class="repo-grid"></div>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
