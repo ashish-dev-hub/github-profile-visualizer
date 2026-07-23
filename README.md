@@ -1,4 +1,4 @@
-# devcard — GitHub Profile Visualizer
+# Devcard — GitHub Profile Visualizer
 
 A reimagined GitHub profile viewer built for the Cloud Computing Cell (AKGEC) frontend task.
 Plain HTML / CSS / vanilla JavaScript — no frameworks, no build step, no charting libraries.
