@@ -5,17 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Devcard — GitHub Profile Visualizer</title>
 <meta name="description" content="A reimagined, animated GitHub profile viewer with hand-built data visualizations." />
+<link rel="icon" type="png" href="logo_1.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="bg-orb bg-orb--blue"></span>
+    <span class="bg-orb bg-orb--purple"></span>
+    <span class="bg-orb bg-orb--teal"></span>
+    <span class="bg-orb bg-orb--pink"></span>
+  </div>
+  
   <header class="nav">
     <div class="nav__inner">
-      <a class="nav__brand" href="#" onclick="return false;">
-        <span class="nav__mark">Devcard</span><span class="nav__dot">.</span>
+      <a class="nav__brand" href="#" on click="return false;">
+        <span class="nav__mark">Dev</span><span class="nav__dot">.Card</span>
       </a>
       <div class="nav__actions">
         <button id="compareToggle" class="btn btn--outline" type="button">Compare mode</button>
@@ -28,7 +35,7 @@
 
   <section class="hero">
     <div class="hero__inner">
-      <p class="pill">Live data · GitHub REST API</p>
+      <p class="pill">Live data . GitHub REST API</p>
       <h1 class="hero__title">Explore a developers<br/>live projects</h1>
       <p class="hero__sub">Type a GitHub username We fetch the profile, repos, and language data,
         and hand-build every chart from scratch - no charting libraries involved</p>
@@ -41,7 +48,7 @@
         <div id="compareRow" class="search__row search__row--compare hidden">
           <input id="usernameInput2" class="search__input" type="text" placeholder="second username to compare" aria-label="Second GitHub username" />
         </div>
-        <p class="search__hint">Try edge cases too: a nonexistent username, or an account with zero public repos</p>
+        <p class="search__hint">Try edge cases too: a nonexistent username, or an account with zero public repos.</p>
       </form>
     </div>
   </section>
@@ -79,8 +86,7 @@
   </main>
 
   <footer class="footer">
-    <p>Built for the Cloud Computing Cell <br>AKGEC - Frontend Task
-       Data via the public GitHub REST API<br> Unauthenticated rate limit: 60 req/hr.</p>
+    <p>Built for the Cloud Computing Cell AKGEC - Frontend Task. Data via the public GitHub REST API. Unauthenticated rate limit: 60 req/hr</p>
   </footer>
 
   <template id="profileTemplate">

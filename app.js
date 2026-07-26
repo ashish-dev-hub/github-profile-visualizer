@@ -36,7 +36,7 @@ async function ghFetch(url){
   if (res.status === 403 && remaining === '0'){
     const resetTime = resetHeader ? new Date(parseInt(resetHeader,10) * 1000) : null;
     const result = { ok:false, kind:'rate-limit', status:403, resetTime };
-    return result; 
+    return result;
   }
   if (res.status === 404){
     const result = { ok:false, kind:'not-found', status:404 };
@@ -144,19 +144,37 @@ function renderDonutChart(container, langData){
     svg.appendChild(seg);
   });
 
+  const centerBacking = document.createElementNS(svgNS, 'circle');
+  centerBacking.setAttribute('cx', cx); centerBacking.setAttribute('cy', cy);
+  centerBacking.setAttribute('r', r - stroke/2 - 2);
+  centerBacking.setAttribute('fill', 'var(--surface-base, #000)');
+  centerBacking.setAttribute('opacity', '0.55');
+  svg.appendChild(centerBacking);
+
   const centerText = document.createElementNS(svgNS,'text');
-  centerText.setAttribute('x', cx); centerText.setAttribute('y', cy-4);
+  centerText.setAttribute('x', cx); centerText.setAttribute('y', cy-6);
   centerText.setAttribute('text-anchor','middle');
-  centerText.setAttribute('font-size','13');
-  centerText.setAttribute('fill','var(--text-mute)');
-  centerText.textContent = `${langData.length} langs`;
+  centerText.setAttribute('font-size','20');
+  centerText.setAttribute('font-weight','700');
+  centerText.setAttribute('fill','#ffffff');
+  centerText.textContent = `${langData.length}`;
   svg.appendChild(centerText);
 
+  const centerLabel = document.createElementNS(svgNS,'text');
+  centerLabel.setAttribute('x', cx); centerLabel.setAttribute('y', cy+13);
+  centerLabel.setAttribute('text-anchor','middle');
+  centerLabel.setAttribute('font-size','11');
+  centerLabel.setAttribute('font-weight','600');
+  centerLabel.setAttribute('letter-spacing','0.5');
+  centerLabel.setAttribute('fill','#ffffff');
+  centerLabel.textContent = 'LANGS';
+  svg.appendChild(centerLabel);
+
   const centerSub = document.createElementNS(svgNS,'text');
-  centerSub.setAttribute('x', cx); centerSub.setAttribute('y', cy+16);
+  centerSub.setAttribute('x', cx); centerSub.setAttribute('y', cy+28);
   centerSub.setAttribute('text-anchor','middle');
-  centerSub.setAttribute('font-size','11');
-  centerSub.setAttribute('fill','var(--ink-faint)');
+  centerSub.setAttribute('font-size','10');
+  centerSub.setAttribute('fill','#c8ccd0');
   centerSub.textContent = 'detected';
   svg.appendChild(centerSub);
 
@@ -169,12 +187,28 @@ function renderDonutChart(container, langData){
     row.className = 'lang-legend__row';
     row.innerHTML = `
       <span class="lang-legend__swatch" style="background:${lang.color}"></span>
-      <span class="lang-legend__name">${escapeHtml(lang.name)}</span>
       <span class="lang-legend__pct">${(lang.pct*100).toFixed(1)}%</span>
+      <span class="lang-legend__name">${escapeHtml(lang.name)}</span>
     `;
     legend.appendChild(row);
   });
   container.appendChild(legend);
+
+  const top1 = slices[0];
+  const second = slices[1];
+  const spotlight = document.createElement('div');
+  spotlight.className = 'lang-spotlight';
+  spotlight.style.setProperty('--spotlight-color', top1.color);
+  spotlight.innerHTML = `
+    <span class="lang-spotlight__eyebrow">Primary language</span>
+    <span class="lang-spotlight__name">${escapeHtml(top1.name)}</span>
+    <span class="lang-spotlight__pct">${(top1.pct*100).toFixed(1)}<small>%</small></span>
+    <p class="lang-spotlight__note">
+      ${escapeHtml(top1.name)} makes up over ${top1.pct > 0.5 ? 'half' : 'a large share'} of this
+      developer's code${second ? `, followed by ${escapeHtml(second.name)} at ${(second.pct*100).toFixed(1)}%` : ''}.
+    </p>
+  `;
+  container.appendChild(spotlight);
 }
 
 (function injectSliceAnim(){
@@ -200,7 +234,9 @@ function renderRepoCards(container, repos){
     card.target = '_blank';
     card.rel = 'noopener noreferrer';
     card.style.animation = `fadeIn .4s ease ${i*0.05}s both`;
-    const langColor = repo.language ? colorForLanguage(repo.language, i) : 'var(--ink-faint)';
+    const langColor = repo.language ? colorForLanguage(repo.language, i) : '#9a9a9a';
+    card.style.setProperty('--card-glow', langColor);
+    card.style.setProperty('--card-glow-shadow', hexToRgba(langColor, 0.35));
     card.innerHTML = `
       <span class="repo-card__name">${escapeHtml(repo.name)}</span>
       <span class="repo-card__desc">${escapeHtml(repo.description || 'No description provided.')}</span>
@@ -210,15 +246,53 @@ function renderRepoCards(container, repos){
         ${repo.language ? `<span class="repo-card__lang"><span class="repo-card__lang-dot" style="background:${langColor}"></span>${escapeHtml(repo.language)}</span>` : ''}
       </span>
     `;
+    attachTilt(card);
     container.appendChild(card);
   });
 }
 
+const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function attachTilt(el){
+  if (prefersReducedMotion) return;
+  const maxTilt = 8; 
+
+  el.addEventListener('mousemove', (e) => {
+    const rect = el.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width;  
+    const py = (e.clientY - rect.top) / rect.height;  
+    const rotateY = (px - 0.5) * maxTilt * 2;
+    const rotateX = (0.5 - py) * maxTilt * 2;
+    el.style.transform = `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px) scale(1.03)`;
+  });
+  el.addEventListener('mouseleave', () => {
+    el.style.transform = '';
+  });
+}
+
+function hexToRgba(hex, alpha){
+  if (!hex.startsWith('#')) return `rgba(154,154,154,${alpha})`;
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 function renderIdentity(card, user){
-  card.querySelector('.profile-card__avatar').src = user.avatar_url;
-  card.querySelector('.profile-card__avatar').alt = `${user.login} avatar`;
-  card.querySelector('.profile-card__name').textContent = user.name || user.login;
-  card.querySelector('.profile-card__login').textContent = `@${user.login}`;
+  const profileUrl = user.html_url || `https://github.com/${user.login}`;
+
+  const avatarEl = card.querySelector('.profile-card__avatar');
+  avatarEl.src = user.avatar_url;
+  avatarEl.alt = `${user.login} avatar`;
+  makeClickableLink(avatarEl, profileUrl, `Open ${user.login}'s GitHub profile`);
+
+  const nameEl = card.querySelector('.profile-card__name');
+  nameEl.textContent = user.name || user.login;
+  makeClickableLink(nameEl, profileUrl, `Open ${user.login}'s GitHub profile`);
+
+  const loginEl = card.querySelector('.profile-card__login');
+  loginEl.textContent = `@${user.login}`;
+  makeClickableLink(loginEl, profileUrl, `Open ${user.login}'s GitHub profile`);
 
   const meta = card.querySelector('.profile-card__meta');
   meta.innerHTML = '';
@@ -237,19 +311,43 @@ function renderIdentity(card, user){
   const stats = card.querySelector('.profile-card__stats');
   stats.innerHTML = '';
   const statList = [
-    ['Repositories', user.public_repos],
-    ['Followers', user.followers],
-    ['Following', user.following],
-    ['Gists', user.public_gists]
+    ['Repositories', user.public_repos, '📦', '#007bff', `${profileUrl}?tab=repositories`],
+    ['Followers', user.followers, '👥', '#8a3ffc', `${profileUrl}?tab=followers`],
+    ['Following', user.following, '➜', '#00c2a8', `${profileUrl}?tab=following`],
+    ['Gists', user.public_gists, '📝', '#ff3d81', `https://gist.github.com/${user.login}`]
   ];
-  statList.forEach(([label, value]) => {
-    const el = document.createElement('div');
+  statList.forEach(([label, value, icon, color, href]) => {
+    const el = document.createElement('a');
     el.className = 'stat';
-    el.innerHTML = `<span class="stat__value">${formatCount(value)}</span><span class="stat__label">${label}</span>`;
+    el.href = href;
+    el.target = '_blank';
+    el.rel = 'noopener noreferrer';
+    el.setAttribute('aria-label', `View ${user.login}'s ${label.toLowerCase()} on GitHub`);
+    el.innerHTML = `
+      <span class="stat__icon" style="background:${hexToRgba(color,0.16)}; color:${color};">${icon}</span>
+      <span class="stat__text">
+        <span class="stat__value">${formatCount(value)}</span>
+        <span class="stat__label">${label}</span>
+      </span>
+    `;
     stats.appendChild(el);
   });
 
   typeBio(card.querySelector('.profile-card__bio'), user.bio || 'This developer hasn\u2019t written a bio yet.');
+}
+
+function makeClickableLink(el, url, label){
+  el.classList.add('clickable-link');
+  el.setAttribute('role', 'link');
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('aria-label', label);
+  el.addEventListener('click', () => window.open(url, '_blank', 'noopener,noreferrer'));
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  });
 }
 
 function typeBio(el, text){
@@ -257,18 +355,17 @@ function typeBio(el, text){
   const caret = document.createElement('span');
   caret.className = 'caret';
   caret.textContent = '|';
-  el.appendChild(document.createTextNode(''));
+
   let i = 0;
   const speed = Math.max(8, Math.min(28, 900 / text.length));
-  el.textContent = '';
+
   function step(){
     el.textContent = text.slice(0, i);
     el.appendChild(caret);
     i++;
     if (i <= text.length){
       setTimeout(step, speed);
-    } else {
-      caret.remove();
+
     }
   }
   step();
@@ -304,6 +401,7 @@ async function buildProfileInto(container, username, onStatus){
 
   const reposResult = await getRepos(username);
   if (!reposResult.ok){
+    
     node.querySelector('.chart-wrap').innerHTML = '<p class="empty-panel">Repository data unavailable right now (GitHub API limit or network issue). Profile info above is still live.</p>';
     node.querySelector('.repo-grid').innerHTML = '';
     node.querySelector('.panel--repos .panel__tag').textContent = '';
@@ -469,16 +567,17 @@ els.compareToggle.addEventListener('click', () => {
 });
 
 function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
   document.body.setAttribute('data-theme', theme);
   els.themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
-let currentTheme = 'light';
+let currentTheme = 'dark';
 els.themeToggle.addEventListener('click', () => {
-  currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
   applyTheme(currentTheme);
 });
 
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){
-  currentTheme = 'dark';
-  applyTheme(currentTheme);
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches){
+  currentTheme = 'light';
 }
+applyTheme(currentTheme);
